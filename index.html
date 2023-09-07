@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <meta name="googlebot" content="notranslate"/>
+    <link rel="icon" type="image/png" href="./favicon.svg"/>
+    <link rel='stylesheet' href='//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css'>
+
+    <title>Chat-Agent Demo | Observe the social behavior of the agent</title>
+
+    <style>
+        body {
+            overflow: hidden;
+            margin: 0px;
+        }
+
+        /*LOADING OVERLAY*/
+        #loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            z-index: 101;
+            background-color: black;
+            color: white;
+            font-size: 20px;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #loading-wrapper {
+            position: relative;
+            top: -10%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #loading-wrapper img {
+            /*height: 82px;*/
+            margin-bottom: 27px;
+            /*background-color: gray;*/
+            padding: 10px;
+        }
+
+        /* config dialog */
+        #progressbar {
+            border-radius: 4px;
+            height: 8px;
+            margin-left: 25%;
+            margin-top: 1em;
+            width: 50%;
+            background-color: #444;
+            border: 1px solid #777;
+        }
+
+        #cursor {
+            border-radius: 4px;
+            height: 6px;
+            width: 0%;
+            background-color: orange;
+        }
+
+        .container {
+            /*display: none;*/
+            position: absolute;
+            right: 0;
+            bottom: 10px;
+            margin-top: 10px;
+            border-radius: 20px;
+            border: 1px solid black;
+            background-color: lightgray;
+            padding-left: 30px;
+            padding-right: 30px;
+            padding-top: 30px;
+            padding-bottom: 15px;
+        }
+
+
+        #clock {
+            border-radius: 20px;
+            border: 1px solid gray;
+            background-color: black;
+            color: orange;
+            text-align: center;
+            height: 120px;
+            padding-top: 20px;
+
+        }
+
+        .clockTextL1 {
+            font-family: Verdana, Arial sans-serif;
+            font-size: 18px;
+        }
+
+        .clockTextL2 {
+            font-family: Verdana, Arial sans-serif;
+            font-size: 18px
+        }
+
+
+        #clock-buttons {
+            margin-left: auto;
+            margin-right: auto;
+            display: table;
+            margin-top: 15px;
+
+        }
+
+        #dialog-config {
+            display: none;
+        }
+
+        .mybtn {
+            font-family: Verdana, Arial, sans-serif;
+            font-size: 1rem !important;
+            margin: 0;
+            padding: 2px 6px 3px;
+        }
+
+        .mybtnRightMargin {
+            margin-right: 0.4em;
+        }
+
+        .mybtnFixedWidth {
+            width: 102px;
+        }
+
+        .myinput {
+            font-family: Verdana, Arial, sans-serif;
+            font-size: 1rem !important;
+        }
+
+
+        hr {
+            border-top: 1px solid gray;
+        }
+
+
+        #dlgButtons {
+            margin-left: auto;
+            margin-right: auto;
+            display: table;
+            margin-top: 1rem;
+        }
+
+        span {
+            font-family: Verdana, Arial, sans-serif;
+            font-size: 1rem;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body>
+<div style="font-family:ipix; position:absolute; left:-1000px; visibility:hidden;">.</div>
+<!-- config dialog start -->
+<div class="container">
+    <div id="clock">
+        <div id="clockText">
+            <img id="profile_img" src=""  alt="profile"/><br>
+            <span id="clockTextL1"></span><br>
+            <span  id="clockTextL2"></span>
+        </div>
+        <div id="progressbar">
+            <div id="cursor"></div>
+        </div>
+    </div>
+    <div id="clock-buttons">
+        <button class="mybtn mybtnRightMargin mybtnFixedWidth" id="startPauseButton">
+            <i class="fa fa-play" aria-hidden="true">
+                <span><a target="_blank" href="https://github.com/10cl/chatdev/">Github</a></span>
+            </i>
+        </button>
+        <button class="mybtn" id="settingsButton">
+            <i class="fa fa-cog" aria-hidden="true">
+                <span>&nbsp;Settings</span>
+            </i>
+        </button>
+    </div>
+</div>
+
+<div id="dialog-config" title="Settings">
+    <table>
+        <tr>
+            <td>
+                <span> move step: </span>
+                <input id="spinSessionStep" class="myinput" size="2" readonly/>
+            </td>
+            <td>
+                <span> move speed: </span>
+                <input id="spinSessionSeconds" class="myinput" size="2" readonly/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span> language: </span>
+                <select class="myinput"  name="" id="">
+                    <option value="english">english</option>
+<!--                    <option value="chinese">chinese</option>-->
+                </select>
+            </td>
+            <td>
+                <span> text delay: </span>
+                <input id="spinBreakSeconds" class="myinput" size="2" readonly/>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <span> Watch Person: </span>
+                <select class="myinput"  name="spinWatchPerson" id="spinWatchPerson">
+                    <option value="Maria_Lopez">Maria_Lopez</option>
+                    <option value="John_Lin">John_Lin</option>
+                    <option value="Sam_Moore">Sam_Moore</option>
+                    <option value="Giorgio_Rossi">Giorgio_Rossi</option>
+                    <option value="Carmen_Ortiz">Carmen_Ortiz</option>
+                    <option value="Ayesha_Khan">Ayesha_Khan</option>
+                    <option value="Hailey_Johnson">Hailey_Johnson</option>
+                    <option value="Adam_Smith">Adam_Smith</option>
+                    <option value="Eddy_Lin">Eddy_Lin</option>
+                    <option value="Tamara_Taylor">Tamara_Taylor</option>
+                    <option value="Klaus_Mueller">Klaus_Mueller</option>
+                    <option value="Abigail_Chen">Abigail_Chen</option>
+                    <option value="Jane_Moreno">Jane_Moreno</option>
+                    <option value="Latoya_Williams">Latoya_Williams</option>
+                    <option value="Francisco_Lopez">Francisco_Lopez</option>
+                    <option value="Carlos_Gomez">Carlos_Gomez</option>
+                    <option value="Ryan_Park">Ryan_Park</option>
+                    <option value="Wolfgang_Schulz">Wolfgang_Schulz</option>
+                    <option value="Arthur_Burton">Arthur_Burton</option>
+                    <option value="Isabella_Rodriguez">Isabella_Rodriguez</option>
+                    <option value="Jennifer_Moore">Jennifer_Moore</option>
+                    <option value="Tom_Moreno">Tom_Moreno</option>
+                    <option value="Rajiv_Patel">Rajiv_Patel</option>
+                    <option value="Yuriko_Yamamoto">Yuriko_Yamamoto</option>
+                    <option value="Mei_Lin">Mei_Lin</option>
+                </select>
+            </td>
+            <td>
+                <span> Follow Person: </span>
+                <select class="myinput"  name="spinFollowPerson" id="spinFollowPerson">
+                    <option value="1">true</option>
+                    <option value="0">false</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+    <hr/>
+    <div id="dlgButtons">
+        <button class="mybtn mybtnRightMargin" id="btnSaveTimerConfig">
+            <i class="fa fa-check" aria-hidden="true">
+                <span>&nbsp;Ok</span>
+            </i>
+        </button>
+        <button id="btnCancelTimerConfig" class="mybtn">
+            <i class="fa fa-close" aria-hidden="true">
+                <span>&nbsp;Cancel</span>
+            </i>
+        </button>
+        <div>
+        </div>
+    </div>
+</div>
+<!-- config dialog end -->
+<div id="loading">
+    <div id="loading-wrapper">
+        <img src="./loading.png" alt="">
+        <span>Loading...</span>
+    </div>
+</div>
+<div class="game-container" id="game-container"></div>
+<script>
+</script>
+<script type="text/javascript" src="bundle.min.js"></script></body>
+</html>
